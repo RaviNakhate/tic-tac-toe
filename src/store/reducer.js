@@ -217,6 +217,23 @@ const randomCorner = () => {
   obj.ttt[nextMove] = "fa fa-check text-success";
 };
 
+const randomSide = () => {
+  let nextMove;
+  if (obj.ttt[1] == 1) {
+    nextMove = 1;
+  }
+  if (obj.ttt[3] == 3) {
+    nextMove = 3;
+  }
+  if (obj.ttt[5] == 5) {
+    nextMove = 5;
+  }
+  if (obj.ttt[7] == 7) {
+    nextMove = 7;
+  }
+  obj.ttt[nextMove] = "fa fa-check text-success";
+};
+
 const randomEmpty = () => {
   const nextMove = obj.ttt.findIndex((val) => {
     if ("number" == typeof val) {
@@ -256,12 +273,11 @@ const medium = () => {
 //
 const hard = () => {
   /* WHEN AI 2ND CHANCE */
-  if (
-    obj.chanceNum == 1 ||
-    obj.chanceNum == 3 ||
-    obj.chanceNum == 5 ||
-    obj.chanceNum == 7
-  ) {
+  if (obj.chanceNum == 1) {
+    randomSide();
+    return true;
+  }
+  if (obj.chanceNum == 3 || obj.chanceNum == 5 || obj.chanceNum == 7) {
     const x = wonSuccess();
     if (x == undefined) {
       const y = fightDanger();
@@ -419,7 +435,42 @@ const hard = () => {
     }
   }
 
-  //chance 3 (corner)
+  //chance 3 when side
+  if (obj.chanceNum == 4) {
+    if (
+      obj.ttt[1] == "fa fa-times text-danger" &&
+      obj.ttt[2] == "fa fa-check text-success" &&
+      obj.ttt[5] == "fa fa-times text-danger"
+    ) {
+      obj.ttt[6] = "fa fa-check text-success";
+      return true;
+    }
+    if (
+      obj.ttt[5] == "fa fa-times text-danger" &&
+      obj.ttt[8] == "fa fa-check text-success" &&
+      obj.ttt[7] == "fa fa-times text-danger"
+    ) {
+      obj.ttt[0] = "fa fa-check text-success";
+      return true;
+    }
+    if (
+      obj.ttt[3] == "fa fa-times text-danger" &&
+      obj.ttt[6] == "fa fa-check text-success" &&
+      obj.ttt[7] == "fa fa-times text-danger"
+    ) {
+      obj.ttt[2] = "fa fa-check text-success";
+      return true;
+    }
+    if (
+      obj.ttt[1] == "fa fa-times text-danger" &&
+      obj.ttt[0] == "fa fa-check text-success" &&
+      obj.ttt[3] == "fa fa-times text-danger"
+    ) {
+      obj.ttt[8] = "fa fa-check text-success";
+      return true;
+    }
+  }
+  //chance 3 when corner
   if (obj.chanceNum == 4) {
     if (
       (obj.ttt[0] == "fa fa-check text-success" &&
@@ -439,14 +490,13 @@ const hard = () => {
       return true;
     }
   }
-  // when not good chance then random
+  // Above all false then
+  // Next Move...
   const x = wonSuccess();
   if (x == undefined) {
     const y = fightDanger();
     if (y == undefined) {
-      if (obj.chanceNum == 8) {
-        randomEmpty();
-      }
+      randomEmpty();
     }
   }
   return true;
