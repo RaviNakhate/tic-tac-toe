@@ -24,18 +24,28 @@ export default function Modals() {
                 <div className="row my-3 justify-content-center">
                   {obj.mainMultiplayer == "off" ? (
                     obj.winPlayer === "fa fa-times text-danger" ? (
-                      <i className="fa fa-times mt-2 mr-3 text-danger"></i>
+                      <>
+                        <i className="fa fa-times mt-2 mr-3 text-danger"></i>
+                        You{" "}
+                      </>
                     ) : (
                       <>
-                        <i className="fa fa-microchip my-auto mr-3"></i> Ai{" "}
+                        <i className="fa fa-microchip my-auto mr-3"></i>
+                        {"Ai is "}
                       </>
                     )
                   ) : obj.winPlayer === "fa fa-times text-danger" ? (
-                    <i className="fa fa-times mt-2 mr-3 text-danger"></i>
+                    <>
+                      <i className="fa fa-times mt-2 mr-3 text-danger"></i>
+                      {"is "}
+                    </>
                   ) : (
-                    <i className="fa fa-check text-success mt-2 mr-3 "></i>
+                    <>
+                      <i className="fa fa-check text-success mt-2 mr-3 "></i>
+                      {"is "}
+                    </>
                   )}
-                  is win
+                  won
                 </div>
                 <button
                   className="btn btn btn-primary px-5"

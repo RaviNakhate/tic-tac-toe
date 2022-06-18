@@ -275,40 +275,12 @@ const hard = () => {
   /* WHEN AI 1ST CHANCE */
   // chance 1st random (corner)
   if (obj.chanceNum == 0) {
-    const arr = [0, 2, 6, 8, 4];
+    const arr = [0, 2, 6, 8];
     const x = getRandom(arr);
     obj.ttt[arr[x]] = "fa fa-check text-success";
     return true;
   }
 
-  // chance 2nd when side (for_Center)
-  if (obj.chanceNum == 2 && obj.ttt[4] == "fa fa-check text-success") {
-    if (obj.ttt[1] == "fa fa-times text-danger") {
-      const arr = [0, 2];
-      const x = getRandom(arr);
-      obj.ttt[arr[x]] = "fa fa-check text-success";
-      return true;
-    }
-    if (obj.ttt[3] == "fa fa-times text-danger") {
-      const arr = [0, 6];
-      const x = getRandom(arr);
-      obj.ttt[arr[x]] = "fa fa-check text-success";
-      return true;
-    }
-
-    if (obj.ttt[5] == "fa fa-times text-danger") {
-      const arr = [2, 8];
-      const x = getRandom(arr);
-      obj.ttt[arr[x]] = "fa fa-check text-success";
-      return true;
-    }
-    if (obj.ttt[7] == "fa fa-times text-danger") {
-      const arr = [6, 8];
-      const x = getRandom(arr);
-      obj.ttt[arr[x]] = "fa fa-check text-success";
-      return true;
-    }
-  }
   // chance 2nd when center
   if (obj.chanceNum == 2 && obj.ttt[4] == "fa fa-times text-danger") {
     const x = obj.ttt.findIndex((val) => {
