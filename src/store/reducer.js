@@ -234,7 +234,6 @@ const randomEmpty = () => {
 //
 //
 //
-//
 const medium = () => {
   const x = wonSuccess();
   if (x == undefined) {
@@ -388,6 +387,7 @@ const hard = () => {
       }
     }
   }
+  //chance 2 when farSide
   if (obj.chanceNum == 2) {
     if (
       obj.ttt[0] == "fa fa-check text-success" &&
@@ -445,15 +445,6 @@ const hard = () => {
       obj.ttt[6] = "fa fa-check text-success";
       return true;
     }
-  } else {
-    const x = wonSuccess();
-    if (x == undefined) {
-      const y = fightDanger();
-      if (y == undefined) {
-        randomEmpty();
-      }
-    }
-    return true;
   }
 
   //chance 3 (corner)
@@ -500,22 +491,27 @@ const hard = () => {
       obj.ttt[5] == "fa fa-times text-danger" ||
       obj.ttt[7] == "fa fa-times text-danger"
     ) {
-      fightDanger();
+      const x = wonSuccess();
+      if (x == undefined) {
+        const y = fightDanger();
+        if (y == undefined) {
+          if (obj.chanceNum == 8) {
+            randomEmpty();
+          }
+        }
+      }
       return true;
     }
   }
-  // chance 4  (center) (corner)
-  // chance 5  (center) (corner)
-  if (obj.chanceNum == 6 || obj.chanceNum == 8) {
-    const x = wonSuccess();
-    if (x == undefined) {
-      const y = fightDanger();
-      if (y == undefined) {
-        if (obj.chanceNum == 8) {
-          randomEmpty();
-        }
+  // when not good chance then random
+  const x = wonSuccess();
+  if (x == undefined) {
+    const y = fightDanger();
+    if (y == undefined) {
+      if (obj.chanceNum == 8) {
+        randomEmpty();
       }
     }
-    return true;
   }
+  return true;
 };
