@@ -435,43 +435,7 @@ const hard = () => {
         obj.ttt[5] == "fa fa-times text-danger" &&
         obj.ttt[2] == "fa fa-check text-success")
     ) {
-      obj.ttt[4] = "fa fa-check text-success";
-      return true;
-    }
-  }
-  // chance 3 (center)
-  if (obj.chanceNum == 4 && obj.ttt[4] == "fa fa-times text-danger") {
-    if (obj.ttt[0] == "fa fa-times text-danger") {
-      obj.ttt[8] = "fa fa-check text-success";
-      return true;
-    }
-    if (obj.ttt[2] == "fa fa-times text-danger") {
-      obj.ttt[6] = "fa fa-check text-success";
-      return true;
-    }
-    if (obj.ttt[6] == "fa fa-times text-danger") {
-      obj.ttt[2] = "fa fa-check text-success";
-      return true;
-    }
-    if (obj.ttt[8] == "fa fa-times text-danger") {
-      obj.ttt[0] = "fa fa-check text-success";
-      return true;
-    }
-    if (
-      obj.ttt[1] == "fa fa-times text-danger" ||
-      obj.ttt[3] == "fa fa-times text-danger" ||
-      obj.ttt[5] == "fa fa-times text-danger" ||
-      obj.ttt[7] == "fa fa-times text-danger"
-    ) {
-      const x = wonSuccess();
-      if (x == undefined) {
-        const y = fightDanger();
-        if (y == undefined) {
-          if (obj.chanceNum == 8) {
-            randomEmpty();
-          }
-        }
-      }
+      randomCorner();
       return true;
     }
   }
