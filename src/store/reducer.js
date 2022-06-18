@@ -360,6 +360,7 @@ const hard = () => {
     if (obj.ttt[6] == "fa fa-check text-success") {
       if (obj.ttt[3] == "fa fa-times text-danger") {
         obj.ttt[8] = "fa fa-check text-success";
+        return true;
       }
       if (obj.ttt[7] == "fa fa-times text-danger") {
         obj.ttt[0] = "fa fa-check text-success";
@@ -393,48 +394,56 @@ const hard = () => {
       obj.ttt[5] == "fa fa-times text-danger"
     ) {
       obj.ttt[6] = "fa fa-check text-success";
+      return true;
     }
     if (
       obj.ttt[0] == "fa fa-check text-success" &&
       obj.ttt[7] == "fa fa-times text-danger"
     ) {
       obj.ttt[2] = "fa fa-check text-success";
+      return true;
     }
     if (
       obj.ttt[6] == "fa fa-check text-success" &&
       obj.ttt[5] == "fa fa-times text-danger"
     ) {
       obj.ttt[0] = "fa fa-check text-success";
+      return true;
     }
     if (
       obj.ttt[6] == "fa fa-check text-success" &&
       obj.ttt[1] == "fa fa-times text-danger"
     ) {
       obj.ttt[8] = "fa fa-check text-success";
+      return true;
     }
     if (
       obj.ttt[2] == "fa fa-check text-success" &&
       obj.ttt[3] == "fa fa-times text-danger"
     ) {
       obj.ttt[8] = "fa fa-check text-success";
+      return true;
     }
     if (
       obj.ttt[2] == "fa fa-check text-success" &&
       obj.ttt[7] == "fa fa-times text-danger"
     ) {
       obj.ttt[0] = "fa fa-check text-success";
+      return true;
     }
     if (
       obj.ttt[8] == "fa fa-check text-success" &&
       obj.ttt[3] == "fa fa-times text-danger"
     ) {
       obj.ttt[2] = "fa fa-check text-success";
+      return true;
     }
     if (
       obj.ttt[8] == "fa fa-check text-success" &&
       obj.ttt[1] == "fa fa-times text-danger"
     ) {
       obj.ttt[6] = "fa fa-check text-success";
+      return true;
     }
   } else {
     const x = wonSuccess();
