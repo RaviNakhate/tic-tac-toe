@@ -1,6 +1,7 @@
 ## Tic Tac Toe
 
-- It is an online database of information related to Movies,Web series.
+- Online fun playing multiplayer/single tic-tac-toe
+- Easy/Medium/Hard mode available
 - Live site (https://ravinakhate.github.io/tictactoe/).
 
 ## Installation
