@@ -1,503 +1,479 @@
 import { obj } from "./data.js";
 
-export const state = (state = obj, action) => {
-  switch (action.type) {
-    case "check":
-      if (obj.mainMultiplayer == "on") {
-        if (typeof obj.ttt[action.payload.ind] === "number") {
-          if (obj.player) {
-            obj.ttt[action.payload.ind] = "fa fa-check text-success";
+export const state = (state = obj, { type, payload }) => {
+  switch (type) {
+    case "changeSettings":
+      changeSettings();
+      return { ...obj };
+    case "tempModeChanges":
+      obj.tempMode = payload.tempMode;
+      return { ...obj };
+    case "tempMultiplayerChanges":
+      obj.tempMultiplayer = payload.tempMultiplayer;
+      return { ...obj };
+    case "move":
+      if (isNull(payload.index)) {
+        obj.board[payload.index] = obj.moveChances;
+        if (checkWinner()) {
+        } else {
+          if (checkDraw()) {
           } else {
-            obj.ttt[action.payload.ind] = "fa fa-times text-danger";
+            changeMoveChances();
+            changeMoveNumber();
+            if (!obj.multiplayer) {
+              aiChance();
+            }
           }
-          obj.player = !obj.player;
-          checkWin();
-          checkDraw();
-        }
-      } else {
-        if (
-          typeof obj.ttt[action.payload.ind] === "number" &&
-          obj.player == 0
-        ) {
-          obj.ttt[action.payload.ind] = "fa fa-times text-danger";
-
-          obj.player = !obj.player;
-          obj.chanceNum = obj.chanceNum + 1;
-          checkWin();
-          checkDraw();
         }
       }
-      return { ...state };
-
-    case "aiChance":
-      if (obj.mainMultiplayer == "off" && obj.player == 1) {
-        aiMachine();
-        obj.player = !obj.player;
-        obj.chanceNum = obj.chanceNum + 1;
-        if (obj.modalBox == false) {
-          checkWin();
-          checkDraw();
-        }
-      }
-      return { ...state };
+      return { ...obj };
+    case "aiMove":
+      aiChance();
+      return { ...obj };
     case "modalBox":
+      obj.modalBox = payload.modalBox;
       restartGame();
-      obj.modalBox = false;
-      return { ...state };
-    case "switchMultiplayer":
-      obj.multiplayer = action.payload;
-      return { ...state };
-    case "switchMode":
-      obj.mode = action.payload;
-      return { ...state };
-    case "switchSetting":
-      obj.player = !obj.player;
-      swtichSetting();
-      return { ...state };
+      return { ...obj };
     default:
-      return { state };
+      return { ...obj };
   }
 };
 
-//
-//
-//
-//
-// Functions...
-//
-//
-//
-//
+// FUNCTIONS
+const restartGame = () => {
+  obj.board = Array(9).fill(null);
+  obj.moveNumber = 0;
+};
 
-const checkWin = () => {
-  obj.won.map((val) => {
-    if (
-      obj.ttt[val[0]] == obj.ttt[val[1]] &&
-      obj.ttt[val[1]] == obj.ttt[val[2]]
-    ) {
-      obj.winPlayer = obj.ttt[val[0]];
-      obj.modalBox = true;
-      obj.winPlayer == "fa fa-times text-danger"
-        ? (obj.winnerLooser[0] = obj.winnerLooser[0] + 1)
-        : (obj.winnerLooser[1] = obj.winnerLooser[1] + 1);
-    }
-  });
+const changeSettings = () => {
+  obj.score = [0, 0];
+  restartGame();
+  obj.multiplayer = obj.tempMultiplayer;
+  obj.mode = obj.tempMode;
+};
+
+const isNull = (index) => {
+  return obj.board[index] == null ? true : false;
+};
+
+const changeMoveChances = () => {
+  if (obj.moveChances == "X") {
+    obj.moveChances = "✓";
+  } else if (obj.moveChances == "✓") {
+    obj.moveChances = "X";
+  }
+};
+
+const changeMoveNumber = () => {
+  obj.moveNumber = obj.moveNumber + 1;
 };
 
 const checkDraw = () => {
-  const indexEmpty =
-    obj.ttt.includes(0) ||
-    obj.ttt.includes(1) ||
-    obj.ttt.includes(2) ||
-    obj.ttt.includes(3) ||
-    obj.ttt.includes(4) ||
-    obj.ttt.includes(5) ||
-    obj.ttt.includes(6) ||
-    obj.ttt.includes(7) ||
-    obj.ttt.includes(8);
-  if (obj.modalBox == false) {
-    if (indexEmpty == false) {
-      restartGame();
-    }
+  // atleast one value are null then return TRUE[game-is-not-over]
+  const res = obj.board.some((val) => val === null);
+  if (!res) {
+    restartGame();
   }
+  return res ? false : true;
 };
 
-const restartGame = () => {
-  obj.ttt = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-  obj.chanceNum = 0;
-};
-
-const swtichSetting = () => {
-  obj.mainMultiplayer = obj.multiplayer;
-  obj.mainMode = obj.mode;
-  restartGame();
-  obj.modalBox = false;
-  obj.winnerLooser = [0, 0];
-};
-
-const getRandom = (arr) => {
-  const randomIndex = Math.floor(Math.random() * arr.length);
-  return randomIndex;
-};
-
-const aiMachine = () => {
-  if (obj.mainMultiplayer == "off" && obj.modalBox == false) {
-    if (obj.mainMode == "easy") {
-      const arr = obj.ttt.filter((val, ind) => {
-        if (typeof val == "number") {
-          return true;
+const checkWinner = () => {
+  let win = false;
+  obj.wonCombinations.map((val) => {
+    const a = obj.board[val[0]];
+    const b = obj.board[val[1]];
+    const c = obj.board[val[2]];
+    // check atleast one value are null it return true
+    const res = [a, b, c].some((val) => val === null);
+    if (!res) {
+      if (
+        obj.board[val[0]] == obj.board[val[1]] &&
+        obj.board[val[1]] == obj.board[val[2]]
+      ) {
+        if (obj.board[val[0]] == "X") {
+          obj.score[0] = obj.score[0] + 1;
         }
-      });
-      const randomIndex = getRandom(arr);
-      const randomNum = arr[randomIndex];
-      obj.ttt[randomNum] = "fa fa-check text-success";
-    } else if (obj.mainMode == "hard") {
-      hard();
-    } else if (obj.mainMode == "medium") {
-      medium();
-    }
-  }
-};
-
-//
-//
-//
-//
-// FUNCTION FOR MODE
-//
-//
-//
-
-const fightDanger = () => {
-  let nextMove;
-  obj.won.map((val) => {
-    if (obj.ttt[val[0]] == obj.ttt[val[2]]) {
-      if ("number" == typeof obj.ttt[val[1]]) {
-        nextMove = val[1];
-      }
-    }
-    if (obj.ttt[val[1]] == obj.ttt[val[2]]) {
-      if ("number" == typeof obj.ttt[val[0]]) {
-        nextMove = val[0];
-      }
-    }
-    if (obj.ttt[val[0]] == obj.ttt[val[1]]) {
-      if ("number" == typeof obj.ttt[val[2]]) {
-        nextMove = val[2];
+        if (obj.board[val[1]] == "✓") {
+          obj.score[1] = obj.score[1] + 1;
+        }
+        obj.winner = obj.moveChances;
+        obj.modalBox = true;
+        win = true;
       }
     }
   });
-  obj.ttt[nextMove] = "fa fa-check text-success";
-  return nextMove;
+  return win ? true : false;
 };
 
-const wonSuccess = () => {
-  let nextMove;
-  obj.won.map((val) => {
-    if (
-      obj.ttt[val[0]] == "fa fa-check text-success" ||
-      obj.ttt[val[1]] == "fa fa-check text-success" ||
-      obj.ttt[val[2]] == "fa fa-check text-success"
-    ) {
-      if (obj.ttt[val[0]] == obj.ttt[val[2]]) {
-        if ("number" == typeof obj.ttt[val[1]]) {
-          nextMove = val[1];
-        }
-      }
-      if (obj.ttt[val[1]] == obj.ttt[val[2]]) {
-        if ("number" == typeof obj.ttt[val[0]]) {
-          nextMove = val[0];
-        }
-      }
-      if (obj.ttt[val[0]] == obj.ttt[val[1]]) {
-        if ("number" == typeof obj.ttt[val[2]]) {
-          nextMove = val[2];
-        }
-      }
+// AI CHANCE
+const aiChance = () => {
+  if (obj.mode == "easy") {
+    easy();
+  } else if (obj.mode == "hard") {
+    hard();
+  } else if (obj.mode == "medium") {
+    medium();
+  }
+};
+
+const easy = () => {
+  const randomIndex = getRandomEmptyIndex();
+  obj.board[randomIndex] = "✓";
+
+  if (checkWinner()) {
+  } else {
+    if (checkDraw()) {
+    } else {
+      changeMoveChances();
+      changeMoveNumber();
     }
-  });
-  obj.ttt[nextMove] = "fa fa-check text-success";
-  return nextMove;
+  }
 };
 
-const randomCorner = () => {
-  let nextMove;
-  if (obj.ttt[0] == 0) {
-    nextMove = 0;
-  }
-  if (obj.ttt[2] == 2) {
-    nextMove = 2;
-  }
-  if (obj.ttt[6] == 6) {
-    nextMove = 6;
-  }
-  if (obj.ttt[8] == 8) {
-    nextMove = 8;
-  }
-  obj.ttt[nextMove] = "fa fa-check text-success";
-};
-
-const randomSide = () => {
-  let nextMove;
-  if (obj.ttt[1] == 1) {
-    nextMove = 1;
-  }
-  if (obj.ttt[3] == 3) {
-    nextMove = 3;
-  }
-  if (obj.ttt[5] == 5) {
-    nextMove = 5;
-  }
-  if (obj.ttt[7] == 7) {
-    nextMove = 7;
-  }
-  obj.ttt[nextMove] = "fa fa-check text-success";
-};
-
-const randomEmpty = () => {
-  const nextMove = obj.ttt.findIndex((val) => {
-    if ("number" == typeof val) {
-      return true;
-    }
-  });
-  obj.ttt[nextMove] = "fa fa-check text-success";
-};
-
-//
-//
-//
-//
-// FUNCTION MEDIUM
-//
-//
-//
 const medium = () => {
-  const x = wonSuccess();
-  if (x == undefined) {
-    const y = fightDanger();
-    if (y == undefined) {
-      randomEmpty();
+  const x = getWonIndex();
+
+  if (x) {
+    obj.board[x] = "✓";
+  } else {
+    const y = preventFailureIndex();
+    if (y) {
+      obj.board[y] = "✓";
+    } else {
+      const z = getRandomEmptyIndex();
+      obj.board[z] = "✓";
     }
   }
-  return true;
+  if (checkWinner()) {
+  } else {
+    if (checkDraw()) {
+    } else {
+      changeMoveChances();
+      changeMoveNumber();
+    }
+  }
 };
 
-//
-//
-//
-//
-// FUNCTION HARD
-//
-//
-//
-//
-const hard = () => {
-  /* WHEN AI 2ND CHANCE */
-  if (obj.chanceNum == 1) {
-    randomSide();
-    return true;
-  }
-  if (obj.chanceNum == 3 || obj.chanceNum == 5 || obj.chanceNum == 7) {
-    const x = wonSuccess();
-    if (x == undefined) {
-      const y = fightDanger();
-      if (y == undefined) {
-        randomEmpty();
+// MOVES
+const getWonIndex = () => {
+  const forWhose = "✓"; // ✓ is alway AI
+  let index = false;
+
+  obj.wonCombinations.map((val) => {
+    const a = obj.board[val[0]];
+    const b = obj.board[val[1]];
+    const c = obj.board[val[2]];
+
+    if (
+      (a === null || b === null || c === null) &&
+      ((a === forWhose && b === forWhose) ||
+        (b === forWhose && c === forWhose) ||
+        (a === forWhose && c === forWhose))
+    ) {
+      // atleast one index is null
+      if (
+        (a === b && b !== c) ||
+        (b === c && c !== a) ||
+        (a === c && c !== b)
+      ) {
+        if (a === null) {
+          index = val[0];
+        } else if (b === null) {
+          index = val[1];
+        } else if (c === null) {
+          index = val[2];
+        }
       }
     }
-    return true;
-  }
+  });
+  return index;
+};
 
-  /* WHEN AI 1ST CHANCE */
-  // chance 1st random (corner)
-  if (obj.chanceNum == 0) {
-    const arr = [0, 2, 6, 8];
-    const x = getRandom(arr);
-    obj.ttt[arr[x]] = "fa fa-check text-success";
-    return true;
-  }
+const preventFailureIndex = () => {
+  const forWhose = "X"; // prevent from X
+  let index = false;
 
-  // chance 2nd when center
-  if (obj.chanceNum == 2 && obj.ttt[4] == "fa fa-times text-danger") {
-    const x = obj.ttt.findIndex((val) => {
-      if (val == "fa fa-check text-success") {
-        return true;
+  obj.wonCombinations.map((val) => {
+    const a = obj.board[val[0]];
+    const b = obj.board[val[1]];
+    const c = obj.board[val[2]];
+
+    if (
+      (a === null || b === null || c === null) &&
+      ((a === forWhose && b === forWhose) ||
+        (b === forWhose && c === forWhose) ||
+        (a === forWhose && c === forWhose))
+    ) {
+      // atleast one index is null
+      if (
+        (a === b && b !== c) ||
+        (b === c && c !== a) ||
+        (a === c && c !== b)
+      ) {
+        if (a === null) {
+          index = val[0];
+        } else if (b === null) {
+          index = val[1];
+        } else if (c === null) {
+          index = val[2];
+        }
       }
-    });
+    }
+  });
+  return index;
+};
 
-    switch (x) {
+const getRandomEmptyIndex = () => {
+  let index;
+  do {
+    index = Math.floor(Math.random() * obj.board.length);
+  } while (obj.board[index] !== null);
+  return index;
+};
+
+const getRandomEmptyCornerIndex = () => {
+  const corner = [0, 2, 6, 8];
+
+  let index;
+  do {
+    index = Math.floor(Math.random() * corner.length);
+  } while (obj.board[corner[index]] !== null);
+  return corner[index];
+};
+
+const getOppositeCornerIndex = {
+  0: 8,
+  8: 0,
+  2: 6,
+  6: 2,
+};
+
+const getNearestEmptyCornerIndex = (x) => {
+  const nextCorner = {
+    0: 2,
+    2: 0,
+    6: 0,
+    8: 2,
+  };
+  const prevCorner = {
+    0: 6,
+    2: 8,
+    6: 8,
+    8: 6,
+  };
+
+  const check1 = nextCorner[x];
+  const check2 = prevCorner[x];
+
+  if (obj.board[check1] === null) return check1;
+  else return check2;
+};
+
+const checkAtleastOneValuePresentSides = (value) => {
+  const arr = [1, 3, 5, 7];
+  const res = arr.some((val) => obj.board[val] === value);
+  return res;
+};
+
+const checkAtleastOneValuePresentCorner = (value) => {
+  const arr = [0, 2, 6, 8];
+  const res = arr.some((val) => obj.board[val] === value);
+  return res;
+};
+
+const checkNearestCornerisEmpty = (side) => {
+  // done
+  const nextCorner = {
+    1: 2,
+    3: 6,
+    5: 8,
+    7: 8,
+  };
+  const prevCorner = {
+    1: 0,
+    3: 0,
+    5: 2,
+    7: 6,
+  };
+  const check1 = nextCorner[side];
+  const check2 = prevCorner[side];
+
+  if (obj.board[check1] === null && obj.board[check2] === null) return true;
+  else return false;
+};
+
+const checkNearestSideisEmpty = (corner) => {
+  const nextSide = {
+    0: 1,
+    2: 1,
+    6: 3,
+    8: 5,
+  };
+  const prevSide = {
+    0: 3,
+    2: 5,
+    6: 7,
+    8: 7,
+  };
+  const check1 = nextSide[corner];
+  const check2 = prevSide[corner];
+
+  if (obj.board[check1] === null && obj.board[check2] === null) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const getCornerWhichSideIsX = (corner, x) => {
+  // done
+  const nextCorner = {
+    0: 2,
+    2: 0,
+    6: 0,
+    8: 2,
+  };
+  const prevCorner = {
+    0: 6,
+    2: 8,
+    6: 8,
+    8: 6,
+  };
+  const check1 = nextCorner[corner];
+  const check2 = prevCorner[corner];
+
+  if (obj.board[check1] === null) {
+    if (x === "empty") {
+      if (checkNearestSideisEmpty(check1)) return check1;
+      else return check2;
+    } else {
+      if (checkNearestSideisEmpty(check1)) return check2;
+      else return check1;
+    }
+  }
+};
+
+//FUNCTION HARD
+const hard = () => {
+  // WHEN AI STARTING TURN 2nd
+  // moveNumber by default value 0 user play 1st chance, moveNumber become 1
+  if ((obj.moveNumber + 1) % 2 === 0) {
+    medium();
+  } else {
+    // WHEN AI STARTING TURN 1st
+    let index = -1;
+    switch (obj.moveNumber) {
       case 0:
-        obj.ttt[8] = "fa fa-check text-success";
-        break;
-      case 8:
-        obj.ttt[0] = "fa fa-check text-success";
-        break;
-      case 6:
-        obj.ttt[2] = "fa fa-check text-success";
+        index = getRandomEmptyCornerIndex();
         break;
       case 2:
-        obj.ttt[6] = "fa fa-check text-success";
+        // if user click center
+        if (obj.board[4] == "X") {
+          const corner = obj.board.findIndex((val) => val === "✓");
+          index = getOppositeCornerIndex[corner];
+        }
+        // if user click corner
+        else if ([0, 2, 6, 8].some((val) => obj.board[val] === "X")) {
+          const corner = obj.board.findIndex((val) => val === "✓");
+          const index1 = getOppositeCornerIndex[corner];
+          index = getNearestEmptyCornerIndex(index1);
+        }
+        // if user click nearSide of AI
+        else if (1) {
+          const x = [1, 3, 5, 7].find((val) => obj.board[val] === "X");
+          // if user click _far_ AI side
+          if (checkNearestCornerisEmpty(x)) {
+            const corner = obj.board.findIndex((val) => val === "✓");
+            index = getCornerWhichSideIsX(corner, "empty");
+          } else {
+            // if user click _near_ AI side
+            const corner = obj.board.findIndex((val) => val === "✓");
+            index = getCornerWhichSideIsX(corner, "notEmpty");
+          }
+        }
         break;
-    }
-    return true;
-  }
-  //chance 2 when corner
-  if (
-    obj.chanceNum == 2 &&
-    (obj.ttt[0] == "fa fa-times text-danger" ||
-      obj.ttt[2] == "fa fa-times text-danger" ||
-      obj.ttt[6] == "fa fa-times text-danger" ||
-      obj.ttt[8] == "fa fa-times text-danger")
-  ) {
-    randomCorner();
-    return true;
-  }
-  //chance 2 when nearSide
-  if (obj.chanceNum == 2) {
-    if (obj.ttt[0] == "fa fa-check text-success") {
-      if (obj.ttt[1] == "fa fa-times text-danger") {
-        obj.ttt[6] = "fa fa-check text-success";
-        return true;
-      }
-      if (obj.ttt[3] == "fa fa-times text-danger") {
-        obj.ttt[2] = "fa fa-check text-success";
-        return true;
-      }
-    }
-    if (obj.ttt[6] == "fa fa-check text-success") {
-      if (obj.ttt[3] == "fa fa-times text-danger") {
-        obj.ttt[8] = "fa fa-check text-success";
-        return true;
-      }
-      if (obj.ttt[7] == "fa fa-times text-danger") {
-        obj.ttt[0] = "fa fa-check text-success";
-        return true;
-      }
-    }
-    if (obj.ttt[8] == "fa fa-check text-success") {
-      if (obj.ttt[7] == "fa fa-times text-danger") {
-        obj.ttt[2] = "fa fa-check text-success";
-        return true;
-      }
-      if (obj.ttt[5] == "fa fa-times text-danger") {
-        obj.ttt[6] = "fa fa-check text-success";
-        return true;
-      }
-    }
-    if (obj.ttt[2] == "fa fa-check text-success") {
-      if (obj.ttt[1] == "fa fa-times text-danger") {
-        obj.ttt[8] = "fa fa-check text-success";
-        return true;
-      }
-      if (obj.ttt[5] == "fa fa-times text-danger") {
-        obj.ttt[0] = "fa fa-check text-success";
-        return true;
-      }
-    }
-  }
-  //chance 2 when farSide
-  if (obj.chanceNum == 2) {
-    if (
-      obj.ttt[0] == "fa fa-check text-success" &&
-      obj.ttt[5] == "fa fa-times text-danger"
-    ) {
-      obj.ttt[6] = "fa fa-check text-success";
-      return true;
-    }
-    if (
-      obj.ttt[0] == "fa fa-check text-success" &&
-      obj.ttt[7] == "fa fa-times text-danger"
-    ) {
-      obj.ttt[2] = "fa fa-check text-success";
-      return true;
-    }
-    if (
-      obj.ttt[6] == "fa fa-check text-success" &&
-      obj.ttt[5] == "fa fa-times text-danger"
-    ) {
-      obj.ttt[0] = "fa fa-check text-success";
-      return true;
-    }
-    if (
-      obj.ttt[6] == "fa fa-check text-success" &&
-      obj.ttt[1] == "fa fa-times text-danger"
-    ) {
-      obj.ttt[8] = "fa fa-check text-success";
-      return true;
-    }
-    if (
-      obj.ttt[2] == "fa fa-check text-success" &&
-      obj.ttt[3] == "fa fa-times text-danger"
-    ) {
-      obj.ttt[8] = "fa fa-check text-success";
-      return true;
-    }
-    if (
-      obj.ttt[2] == "fa fa-check text-success" &&
-      obj.ttt[7] == "fa fa-times text-danger"
-    ) {
-      obj.ttt[0] = "fa fa-check text-success";
-      return true;
-    }
-    if (
-      obj.ttt[8] == "fa fa-check text-success" &&
-      obj.ttt[3] == "fa fa-times text-danger"
-    ) {
-      obj.ttt[2] = "fa fa-check text-success";
-      return true;
-    }
-    if (
-      obj.ttt[8] == "fa fa-check text-success" &&
-      obj.ttt[1] == "fa fa-times text-danger"
-    ) {
-      obj.ttt[6] = "fa fa-check text-success";
-      return true;
-    }
-  }
+      // till correct
+      case 4:
+        const x = getWonIndex();
+        if (x) {
+          index = x;
+          break;
+        }
+        // if user click any side when user 1st tick in center, corner
+        if (obj.board[4] == "X" && checkAtleastOneValuePresentSides("X")) {
+          index = -1;
+        } else if (
+          obj.board[4] == "X" &&
+          checkAtleastOneValuePresentCorner("X")
+        ) {
+          index = getRandomEmptyCornerIndex();
+        } else if (
+          checkAtleastOneValuePresentCorner("X") &&
+          checkAtleastOneValuePresentSides("X")
+        ) {
+          index = getRandomEmptyCornerIndex();
+        } else {
+          const arr = [0, 2, 6, 8].filter((val) => obj.board[val] === "✓");
+          const index1 = getOppositeCornerIndex[arr[0]];
+          const index2 = getOppositeCornerIndex[arr[1]];
+          index = checkNearestSideisEmpty(index1) ? index1 : index2;
+        }
+        break;
+      case 6:
+        const y = getWonIndex();
+        if (y) {
+          index = y;
+          break;
+        }
+        const z = preventFailureIndex();
+        if (z) {
+          index = z;
+          break;
+        }
 
-  //chance 3 when side
-  if (obj.chanceNum == 4) {
-    if (
-      obj.ttt[1] == "fa fa-times text-danger" &&
-      obj.ttt[2] == "fa fa-check text-success" &&
-      obj.ttt[5] == "fa fa-times text-danger"
-    ) {
-      obj.ttt[6] = "fa fa-check text-success";
-      return true;
+        if (checkWinner()) {
+        } else {
+          const arr = [0, 2, 6, 8];
+          const i = arr.reduce((count, value) => {
+            if (obj.board[value] === null) {
+              return count + 1;
+            } else {
+              return count;
+            }
+          }, 0);
+          // 1 corner Null
+          if (i == 1) {
+            index = getRandomEmptyCornerIndex();
+          } else {
+            const arr = [0, 2, 6, 8].filter((val) => obj.board[val] === "✓");
+            const index1 = getOppositeCornerIndex[arr[0]];
+            const index2 = getOppositeCornerIndex[arr[1]];
+
+            if (checkNearestSideisEmpty(index1)) {
+              index = index1;
+            } else {
+              index = index2;
+            }
+          }
+        }
+        break;
+      default:
+        index = -1;
     }
-    if (
-      obj.ttt[5] == "fa fa-times text-danger" &&
-      obj.ttt[8] == "fa fa-check text-success" &&
-      obj.ttt[7] == "fa fa-times text-danger"
-    ) {
-      obj.ttt[0] = "fa fa-check text-success";
-      return true;
-    }
-    if (
-      obj.ttt[3] == "fa fa-times text-danger" &&
-      obj.ttt[6] == "fa fa-check text-success" &&
-      obj.ttt[7] == "fa fa-times text-danger"
-    ) {
-      obj.ttt[2] = "fa fa-check text-success";
-      return true;
-    }
-    if (
-      obj.ttt[1] == "fa fa-times text-danger" &&
-      obj.ttt[0] == "fa fa-check text-success" &&
-      obj.ttt[3] == "fa fa-times text-danger"
-    ) {
-      obj.ttt[8] = "fa fa-check text-success";
-      return true;
-    }
-  }
-  //chance 3 when corner
-  if (obj.chanceNum == 4) {
-    if (
-      (obj.ttt[0] == "fa fa-check text-success" &&
-        obj.ttt[1] == "fa fa-times text-danger" &&
-        obj.ttt[2] == "fa fa-check text-success") ||
-      (obj.ttt[0] == "fa fa-check text-success" &&
-        obj.ttt[3] == "fa fa-times text-danger" &&
-        obj.ttt[6] == "fa fa-check text-success") ||
-      (obj.ttt[6] == "fa fa-check text-success" &&
-        obj.ttt[7] == "fa fa-times text-danger" &&
-        obj.ttt[8] == "fa fa-check text-success") ||
-      (obj.ttt[8] == "fa fa-check text-success" &&
-        obj.ttt[5] == "fa fa-times text-danger" &&
-        obj.ttt[2] == "fa fa-check text-success")
-    ) {
-      randomCorner();
-      return true;
+
+    if (index === -1) {
+      medium();
+    } else {
+      obj.board[index] = "✓";
+      // ai chance completed
+      if (checkWinner()) {
+      } else {
+        if (checkDraw()) {
+        } else {
+          changeMoveChances();
+          changeMoveNumber();
+        }
+      }
     }
   }
-  // Above all false then
-  // Next Move...
-  const x = wonSuccess();
-  if (x == undefined) {
-    const y = fightDanger();
-    if (y == undefined) {
-      randomEmpty();
-    }
-  }
-  return true;
 };

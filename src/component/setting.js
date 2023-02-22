@@ -1,41 +1,19 @@
 import { Button, ButtonGroup } from "@mui/material";
+import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 export default function Setting() {
-  const x = useSelector((state) => state);
-  const obj = x.state.state;
+  const {
+    state: { mode, tempMode, multiplayer, tempMultiplayer },
+  } = useSelector((state) => state);
   const dispatch = useDispatch();
 
-  const filter = (type, val) => {
-    switch (type) {
-      case "checkMultiplayer":
-        if (obj.multiplayer == val) {
-          return "contained";
-        } else {
-          return "outlined";
-        }
-
-      case "checkMode":
-        if (obj.mode == val) {
-          return "contained";
-        } else {
-          return "outlined";
-        }
-    }
+  const changeSettings = () => {
+    dispatch({
+      type: "changeSettings",
+      payload: null,
+    });
   };
-
-  const switchMultiplayer = (val) => {
-    dispatch({ type: "switchMultiplayer", payload: val });
-  };
-
-  const switchMode = (val) => {
-    dispatch({ type: "switchMode", payload: val });
-  };
-
-  const switchSetting = () => {
-    dispatch({ type: "switchSetting" });
-  };
-
   return (
     <>
       <form
@@ -47,28 +25,37 @@ export default function Setting() {
           <ButtonGroup
             size="small"
             aria-label="small outlined button group"
-            disabled={obj.multiplayer == "on" ? true : false}
+            disabled={tempMultiplayer ? true : false}
           >
             <Button
-              variant={filter("checkMode", "easy")}
+              variant={tempMode === "easy" ? "contained" : "outlined"}
               onClick={() => {
-                switchMode("easy");
+                dispatch({
+                  type: "tempModeChanges",
+                  payload: { tempMode: "easy" },
+                });
               }}
             >
               Easy
             </Button>
             <Button
-              variant={filter("checkMode", "medium")}
+              variant={tempMode === "medium" ? "contained" : "outlined"}
               onClick={() => {
-                switchMode("medium");
+                dispatch({
+                  type: "tempModeChanges",
+                  payload: { tempMode: "medium" },
+                });
               }}
             >
               Medium
             </Button>
             <Button
-              variant={filter("checkMode", "hard")}
+              variant={tempMode === "hard" ? "contained" : "outlined"}
               onClick={() => {
-                switchMode("hard");
+                dispatch({
+                  type: "tempModeChanges",
+                  payload: { tempMode: "hard" },
+                });
               }}
             >
               Hard
@@ -79,17 +66,23 @@ export default function Setting() {
         <div className="row justify-content-center  my-3">
           <ButtonGroup size="small" aria-label="small outlined button group">
             <Button
-              variant={filter("checkMultiplayer", "off")}
+              variant={tempMultiplayer ? "outlined" : "contained"}
               onClick={() => {
-                switchMultiplayer("off");
+                dispatch({
+                  type: "tempMultiplayerChanges",
+                  payload: { tempMultiplayer: false },
+                });
               }}
             >
               Single Player
             </Button>
             <Button
-              variant={filter("checkMultiplayer", "on")}
+              variant={tempMultiplayer ? "contained" : "outlined"}
               onClick={() => {
-                switchMultiplayer("on");
+                dispatch({
+                  type: "tempMultiplayerChanges",
+                  payload: { tempMultiplayer: true },
+                });
               }}
             >
               Multiplayer
@@ -101,7 +94,7 @@ export default function Setting() {
           <button
             className="btn btn-sm btn-primary px-3"
             onClick={() => {
-              switchSetting();
+              dispatch({ type: "changeSettings", payload: null });
             }}
           >
             start
