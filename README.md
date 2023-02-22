@@ -7,16 +7,5 @@
 ## Installation
 
 ```bash
-https://github.com/RaviNakhate/tictactoe.git
-```
-
-## Install Package
-
-```bash
-npm install axios
-```
-
-```bash
-npm install @mui/material @emotion/react @emotion/styled
-
+git clone https://github.com/RaviNakhate/tictactoe.git
 ```
