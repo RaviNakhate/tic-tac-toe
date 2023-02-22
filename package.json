@@ -1,5 +1,6 @@
 {
   "name": "tic-tac-toe",
+  "homepage": "https://ravinakhate.github.io/tictactoe",
   "description": "Tic Tac Toe Game",
   "version": "0.1.0",
   "private": true,

@@ -11,6 +11,7 @@ export default function Board() {
       tempMode,
       multiplayer,
       tempMultiplayer,
+      modalBox,
     },
   } = useSelector((state) => state);
   const dispatch = useDispatch();
@@ -27,6 +28,56 @@ export default function Board() {
       }
     }
   }, [moveNumber]);
+
+  document.onkeypress = (e) => {
+    let key = e.keyCode;
+    if (modalBox == false) {
+      if (key >= 49 && key <= 57) {
+        switch (key) {
+          case 49:
+            key = 6;
+            break;
+          case 50:
+            key = 7;
+            break;
+          case 51:
+            key = 8;
+            break;
+          case 52:
+            key = 3;
+            break;
+          case 53:
+            key = 4;
+            break;
+          case 54:
+            key = 5;
+            break;
+          case 55:
+            key = 0;
+            break;
+          case 56:
+            key = 1;
+            break;
+          case 57:
+            key = 2;
+            break;
+          default: {
+          }
+        }
+        dispatch({
+          type: "move",
+          payload: { index: key },
+        });
+      }
+    } else {
+      if (key == 13) {
+        dispatch({
+          type: "modalBox",
+          payload: { modalBox: false },
+        });
+      }
+    }
+  };
 
   const chancesPlayerTitleDisplay = () => {
     if (moveChances == "X") {
